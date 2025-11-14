@@ -710,3 +710,69 @@ plt.figure()
 for x in range(10): #plot 10 updates
     plotpos(x)
 plt.show()
+
+
+
+#in box with walls and acceleration
+
+# Maken van de class met versnelling
+class ParticleClass:
+    def __init__(self, m, v, r, R):
+        self.m = m                  # mass of the particle
+        self.v = np.array(v, dtype=float)  # velocity vector
+        self.r = np.array(r, dtype=float)  # position vector
+        self.R = np.array(R, dtype=float)  # radius of the particle
+
+    def update_position(self):
+        self.r += self.v * dt
+    
+    def update_velocity(self, a, i):
+        self.v[i] += a[i]*dt
+
+
+# Simulation parameters
+dt = 0.1         # time step
+a =[0,-9.81]   # acceleration
+num_steps = 500  # number of time steps
+particle = ParticleClass(m=1.0, v=[5.0, 3.0], r=[0.0, 0.0],R=1.0)  
+lower=-10
+upper=10
+# Create the figure and axis
+fig, ax = plt.subplots()
+ax.set_xlim(lower, upper)
+ax.set_ylim(lower, upper)
+ax.set_aspect('equal')
+ax.set_title("Particle Animation")
+ax.set_xlabel("x")
+ax.set_ylabel("y")
+
+# Create the particle as a red dot
+dot, = ax.plot([], [], 'ro', markersize=10)
+
+# Initialization function for animation
+def init():
+    dot.set_data([], [])
+    return dot,
+
+def bounce(x):
+    if particle.r[x]>upper:
+        particle.v[x]=-particle.v[x]
+    if particle.r[x]<lower:
+        particle.v[x]=-particle.v[x]
+
+# Update function for each frame
+def update(frame):
+    particle.update_position()
+    particle.update_velocity(a,0)
+    particle.update_velocity(a,1)
+    dot.set_data([particle.r[0]], [particle.r[1]])
+    bounce(0)
+    bounce(1)
+    return dot,
+
+# Create animation
+ani = FuncAnimation(fig, update, frames=range(200), init_func=init, blit=True, interval=50)
+
+# For Jupyter notebook:
+from IPython.display import HTML
+HTML(ani.to_jshtml())
